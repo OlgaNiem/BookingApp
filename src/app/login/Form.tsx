@@ -22,21 +22,23 @@ import { useRouter } from 'next/navigation'
 
 const formSchema = z.object({
   email: z.string()
-    .min(4, {message: 'This field must be filled.'})
+    .min(4, { message: 'This field must be filled.' })
     .email('This is not a valid email')
-    .max(50, {message: "Email can't be longer than 50 characters."}),
-
-    password: z.string()
-    .min(4, {message: 'Password has to be at least 4 characters long'}),
-    })
+    .max(50, { message: "Email can't be longer than 50 characters." }),
+  password: z.string()
+    .min(4, { message: 'Password has to be at least 4 characters long' }),
+})
 
 const LoginForm = () => {
-  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {},
-  })
-const router = useRouter();
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+  
+  const router = useRouter();
   
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const response = await signIn('credentials', {
@@ -49,43 +51,55 @@ const router = useRouter();
     }
     toast.success('You are now signed in')
   }
+
   return (
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <h1 className='text-2xl font-semibold'>Login</h1>
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                    <FormControl>
-                        <Input type='email' placeholder="Write your email here..." {...field} />
-                    </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <h1 className='text-2xl font-semibold'>Login</h1>
+        
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input
+                  type="email"
+                  placeholder="Write your email here..."
+                  {...field}
+                  value={field.value || ""}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                    <FormControl>
-                        <Input type='password' placeholder=" " {...field} />
-                    </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input
+                  type="password"
+                  placeholder=" "
+                  {...field}
+                  value={field.value || ""} 
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-            <Link className='block' href={'/register'}>Don't have an account?</Link>
-            <Button type="submit">Submit</Button>
-          </form>
-        </Form>
-    )
+        <Link className='block' href={'/register'}>Don't have an account?</Link>
+        <Button type="submit">Submit</Button>
+      </form>
+    </Form>
+  )
 }
 
-export default LoginForm
+export default LoginForm;
