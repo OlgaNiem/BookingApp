@@ -1,11 +1,8 @@
 'use client'
-
 import React from 'react'
-
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -22,6 +19,10 @@ import Link from 'next/link'
 
 
 const formSchema = z.object({
+  name: z.string()
+    .min(2, {message: 'This field must be filled.'})
+    .max(50, {message: "Your name can't be longer than 50 characters."}),
+
   email: z.string()
     .min(4, {message: 'This field must be filled.'})
     .email('This is not a valid email')
@@ -66,6 +67,24 @@ const RegisterForm = () => {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <h1 className='text-2xl font-semibold'>Registration</h1>
+
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input type='name' placeholder="Write your name here..." {...field} />
+                  </FormControl>
+                  <FormDescription>
+                  Please write your real name
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="email"

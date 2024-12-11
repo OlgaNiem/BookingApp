@@ -8,7 +8,7 @@ export default function RedirectPage() {
 
   useEffect(() => {
     if (session?.user.role === 'admin') {
-      router.push('/users');
+      router.push('/user');
     } else {
       router.push('/dashboard');
     }
