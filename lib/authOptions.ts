@@ -1,8 +1,8 @@
+import { db } from "@/lib/prisma";
 import { NextAuthOptions } from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { db } from "@/lib/prisma";
 import { compare } from "bcrypt";
 
 export const AuthOptions: NextAuthOptions = {
@@ -39,10 +39,9 @@ export const AuthOptions: NextAuthOptions = {
                     return null;
                 }
 
-                // Return a user object that matches the custom User type
                 return {
-                    id: user.id, // Assuming 'id' is the correct field in your database
-                    role: user.role || "user", // Assuming 'role' exists in your database
+                    id: user.id,
+                    role: user.role || "user",
                     email: user.email,
                 };
             },
