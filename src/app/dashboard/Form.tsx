@@ -1,7 +1,6 @@
-'use client'
+'use client';
 
-import React, { useState } from 'react';
-
+import React from 'react';
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -78,6 +77,14 @@ const DashboardForm = ({ email }: { email: string }) => {
   const activities = ['Yoga', 'Gym', 'Gymnastics', 'Aqua Aerobics'];
 
   async function handleBookingSubmit(values: z.infer<typeof bookingFormSchema>) {
+    const fullDateTime = new Date(`${values.date}T${values.time}:00`);
+
+    // check date and time
+    if (isNaN(fullDateTime.getTime())) {
+      toast.error('Invalid date or time format.');
+      return;
+    }
+
     const response = await fetch('/api/bookings', {
       method: 'POST',
       headers: {
@@ -85,8 +92,9 @@ const DashboardForm = ({ email }: { email: string }) => {
       },
       body: JSON.stringify({
         email: session?.user?.email,
-        ...values,
-        date: `${values.date}T${values.time}:00`,
+        activity: values.activity,
+        date: fullDateTime.toISOString(), //  ISO 8601
+        
       }),
     });
 
@@ -102,7 +110,7 @@ const DashboardForm = ({ email }: { email: string }) => {
 
   return (
     <div className="space-y-12">
-      {/* Email Update Form */}
+     
       <Form {...emailForm}>
         <form onSubmit={emailForm.handleSubmit(handleEmailSubmit)} className="space-y-8">
           <h1 className="text-2xl font-semibold">Modify your email</h1>
@@ -126,7 +134,6 @@ const DashboardForm = ({ email }: { email: string }) => {
         </form>
       </Form>
 
-      {/* Booking Form */}
       <Form {...bookingForm}>
         <form onSubmit={bookingForm.handleSubmit(handleBookingSubmit)} className="space-y-8">
           <h1 className="text-2xl font-semibold">Book an activity</h1>

@@ -1,31 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { ObjectId } from 'mongodb';
+import { getServerSession } from 'next-auth';
+import { AuthOptions } from '../../../../lib/authOptions';
 
 const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
+  console.log("POST request received");
+
+  const session = await getServerSession(AuthOptions);
+  console.log("Session:", session);
+
+  if (!session || !session.user) {
+    console.log("Unauthorized access attempt");
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const body = await req.json();
-    const { email, activity, date, time } = body;
+    console.log("Request body:", body); 
 
-    if (!email || !activity || !date || !time) {
+    const { activity, date, email } = body;
+      console.log(activity, date, email);
+    if (!activity || !date || !email) {
+      console.log("Missing required fields"); 
       return NextResponse.json({ error: 'All fields are required.' }, { status: 400 });
     }
 
-    const userId = new ObjectId(email); 
-
-    
-    const fullDateTime = new Date(`${date}T${time}:00`);
-
     const booking = await prisma.booking.create({
       data: {
-        userId: userId.toHexString(), 
+        userId: session.user.id,
         activity,
-        date: fullDateTime,
+        date: date,
       },
     });
 
+    console.log('Booking created:', booking);
     return NextResponse.json(booking, { status: 201 });
   } catch (error) {
     console.error('Error creating booking:', error);
