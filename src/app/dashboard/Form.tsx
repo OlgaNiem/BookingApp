@@ -4,8 +4,10 @@ import React from 'react';
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-
+import { toast } from 'sonner'; // Импортируем только toast
 import { Button } from "@/components/ui/button";
+import { Toaster } from 'sonner'; // Импортируем Toaster для отображения уведомлений
+
 import {
   Form,
   FormControl,
@@ -16,10 +18,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { toast } from 'sonner';
+
 import { useSession } from 'next-auth/react';
 import { reloadSession } from '../../../lib/funcs';
 
+// Задаём схему для формы email
 const emailFormSchema = z.object({
   email: z.string()
     .min(4, { message: 'This field must be filled.' })
@@ -27,6 +30,7 @@ const emailFormSchema = z.object({
     .max(50, { message: "Email can't be longer than 50 characters." }),
 });
 
+// Задаём схему для формы бронирования
 const bookingFormSchema = z.object({
   activity: z.string().min(1, { message: 'Please select an activity.' }),
   date: z.string().min(1, { message: 'Please select a date.' }),
@@ -34,7 +38,7 @@ const bookingFormSchema = z.object({
 });
 
 const DashboardForm = ({ email }: { email: string }) => {
-  // Email form
+  // Email форма
   const emailForm = useForm<z.infer<typeof emailFormSchema>>({
     resolver: zodResolver(emailFormSchema),
     defaultValues: { email },
@@ -42,6 +46,7 @@ const DashboardForm = ({ email }: { email: string }) => {
 
   const { data: session, update } = useSession();
 
+  // Обработчик отправки формы email
   async function handleEmailSubmit(values: z.infer<typeof emailFormSchema>) {
     const response = await fetch(`/api/updateEmail`, {
       method: 'POST',
@@ -50,7 +55,7 @@ const DashboardForm = ({ email }: { email: string }) => {
 
     const data = await response.json();
     if (data.error) {
-      toast.error(data.error);
+      toast.error(data.error); // Показать ошибку через toast
       return;
     }
 
@@ -61,10 +66,10 @@ const DashboardForm = ({ email }: { email: string }) => {
 
     reloadSession();
 
-    toast.success('Email changed');
+    toast.success('Email changed'); // Показать успех через toast
   }
 
-  // Booking form
+  // Форма для бронирования
   const bookingForm = useForm<z.infer<typeof bookingFormSchema>>({
     resolver: zodResolver(bookingFormSchema),
     defaultValues: {
@@ -76,12 +81,13 @@ const DashboardForm = ({ email }: { email: string }) => {
 
   const activities = ['Yoga', 'Gym', 'Gymnastics', 'Aqua Aerobics'];
 
+  // Обработчик отправки формы бронирования
   async function handleBookingSubmit(values: z.infer<typeof bookingFormSchema>) {
     const fullDateTime = new Date(`${values.date}T${values.time}:00`);
 
-    // check date and time
+    // Проверка даты и времени
     if (isNaN(fullDateTime.getTime())) {
-      toast.error('Invalid date or time format.');
+      toast.error('Invalid date or time format.'); // Показать ошибку через toast
       return;
     }
 
@@ -91,26 +97,31 @@ const DashboardForm = ({ email }: { email: string }) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        email: session?.user?.email,
         activity: values.activity,
-        date: fullDateTime.toISOString(), //  ISO 8601
-        
+        date: fullDateTime.toISOString(), // ISO 8601
       }),
     });
 
     const data = await response.json();
     if (data.error) {
-      toast.error('Failed to create booking. Try again.');
+      toast.error('Failed to create booking. Try again.'); // Показать ошибку через toast
       return;
     }
 
-    toast.success('Booking created successfully!');
+    // Уведомление об успешном бронировании
+    const formattedDate = fullDateTime.toLocaleDateString();
+    const formattedTime = fullDateTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    toast.success(`Your booking for ${values.activity} on ${formattedDate} at ${formattedTime} has been successfully confirmed!`); // Показать успех через toast
     bookingForm.reset();
   }
 
   return (
     <div className="space-y-12">
-     
+      {/* Компонент Toaster для отображения уведомлений */}
+      <Toaster position="bottom-right" expand={true} richColors={true} />
+
+      {/* Форма для изменения email */}
       <Form {...emailForm}>
         <form onSubmit={emailForm.handleSubmit(handleEmailSubmit)} className="space-y-8">
           <h1 className="text-2xl font-semibold">Modify your email</h1>
@@ -134,6 +145,7 @@ const DashboardForm = ({ email }: { email: string }) => {
         </form>
       </Form>
 
+      {/* Форма для бронирования */}
       <Form {...bookingForm}>
         <form onSubmit={bookingForm.handleSubmit(handleBookingSubmit)} className="space-y-8">
           <h1 className="text-2xl font-semibold">Book an activity</h1>
