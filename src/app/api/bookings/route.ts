@@ -8,7 +8,6 @@ const prisma = new PrismaClient();
 export async function POST(req: NextRequest) {
   console.log("POST request received");
 
-  // Получаем сессию
   const session = await getServerSession(AuthOptions);
   console.log("Session:", session);
 
@@ -23,20 +22,17 @@ export async function POST(req: NextRequest) {
 
     const { activity, date } = body;
 
-    // Проверка на обязательные поля
     if (!activity || !date) {
       console.log("Missing required fields");
       return NextResponse.json({ error: 'All fields are required.' }, { status: 400 });
     }
 
-    // Преобразование строки даты в объект Date
     const bookingDate = new Date(date);
     if (isNaN(bookingDate.getTime())) {
       console.log("Invalid date format");
       return NextResponse.json({ error: 'Invalid date format.' }, { status: 400 });
     }
 
-    // Создаем запись в базе данных
     const booking = await prisma.booking.create({
       data: {
         userId: session.user.id,
@@ -47,12 +43,12 @@ export async function POST(req: NextRequest) {
 
     console.log('Booking created:', booking);
 
-    // Ответ с подтверждением бронирования
+
     return NextResponse.json({
       message: 'Booking created successfully!',
       booking: {
         activity: booking.activity,
-        date: booking.date.toISOString(), // Дата в формате ISO
+        date: booking.date.toISOString(),
       }
     }, { status: 201 });
   } catch (error) {
