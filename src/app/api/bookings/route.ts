@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { AuthOptions } from '../../../../lib/authOptions';
-
+import { ObjectId } from 'mongodb'; 
 const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
@@ -29,20 +29,26 @@ export async function POST(req: NextRequest) {
 
     const bookingDate = new Date(date);
     if (isNaN(bookingDate.getTime())) {
-      console.log("Invalid date format");
       return NextResponse.json({ error: 'Invalid date format.' }, { status: 400 });
     }
 
+    let userId = session.user.id;
+
+    if (!ObjectId.isValid(userId)) {
+      console.error("Invalid userId format");
+      return NextResponse.json({ error: 'Invalid userId format' }, { status: 400 });
+    }
+
+    const userObjectId = new ObjectId(userId).toString();
+    console.log("Converted userId to ObjectId:", userObjectId);  
+
     const booking = await prisma.booking.create({
       data: {
-        userId: session.user.id,
+        userId: userObjectId,
         activity,
         date: bookingDate,
       },
     });
-
-    console.log('Booking created:', booking);
-
 
     return NextResponse.json({
       message: 'Booking created successfully!',

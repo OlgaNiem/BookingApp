@@ -7,7 +7,6 @@ import DashboardForm from './Form';
 const  page = async () => {
     const session = await getServerSession(AuthOptions)
     const user = session?.user
-
     if (!session) {
         redirect('/login')
     }

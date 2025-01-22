@@ -4,6 +4,7 @@ import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcrypt";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 
 export const AuthOptions: NextAuthOptions = {
     session: {
@@ -27,18 +28,19 @@ export const AuthOptions: NextAuthOptions = {
             async authorize(credentials) {
                 if (!credentials) return null;
 
+                const email = credentials.email;
+                if (!email) return null;
+
                 const user = await db.user.findUnique({
-                    where: { email: credentials.email },
+                    where: { email },
                 });
 
                 if (!user) return null;
 
-                const passwordCorrect = await compare(credentials.password, user.password);
+                const passwordCorrect = await compare(credentials.password, user.password as string);
                 if (!passwordCorrect) {
-                    console.log("Incorrect password");
                     return null;
                 }
-
                 return {
                     id: user.id,
                     role: user.role || "user",
@@ -47,18 +49,67 @@ export const AuthOptions: NextAuthOptions = {
             },
         }),
     ],
+    adapter: PrismaAdapter(db),
 
     callbacks: {
-        jwt: async ({ user, token, trigger, session }) => {
-            if (trigger === "update") {
-                return { ...token, ...session.user };
+        async signIn({ user, account }) {
+            const email = user.email;
+    
+            if (!email) {
+                console.error("OAuth user email is missing.");
+                return false;
             }
+    
+            const existingUser = await db.user.findUnique({
+                where: { email },
+            });
+    
+            if (existingUser) {
+                if (account) {
+                    const linkedAccount = await db.account.findFirst({
+                        where: {
+                            userId: existingUser.id,
+                            provider: account.provider!,
+                            providerAccountId: account.providerAccountId!,
+                        },
+                    });
+    
+                    if (!linkedAccount) {
+                        await db.account.create({
+                            data: {
+                                userId: existingUser.id,
+                                provider: account.provider!,
+                                providerAccountId: account.providerAccountId!,
+                                accessToken: account.access_token || "",
+                                refreshToken: account.refresh_token || "",
+                                providerType: account.type || "oauth",
+                            },
+                        });
+                    }
+                }
+            } else {
+                await db.user.create({
+                    data: {
+                        name: user.name || "",
+                        email,
+                       
+                        password: "",
+                        emailVerified: null,
+                    },
+                });
+            }
+    
+            return true;
+        },
+
+        jwt: async ({ user, token }) => {
             if (user) {
                 token.id = user.id;
                 token.role = user.role;
             }
             return token;
         },
+
         session: async ({ session, token }) => {
             if (token) {
                 session.user = {

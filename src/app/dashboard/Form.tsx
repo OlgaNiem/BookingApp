@@ -1,13 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from 'sonner'; 
 import { Button } from "@/components/ui/button";
 import { Toaster } from 'sonner'; 
-
 import {
   Form,
   FormControl,
@@ -22,14 +21,12 @@ import { Input } from "@/components/ui/input";
 import { useSession } from 'next-auth/react';
 import { reloadSession } from '../../../lib/funcs';
 
-
 const emailFormSchema = z.object({
   email: z.string()
     .min(4, { message: 'This field must be filled.' })
     .email('This is not a valid email')
     .max(50, { message: "Email can't be longer than 50 characters." }),
 });
-
 
 const bookingFormSchema = z.object({
   activity: z.string().min(1, { message: 'Please select an activity.' }),
@@ -38,14 +35,14 @@ const bookingFormSchema = z.object({
 });
 
 const DashboardForm = ({ email }: { email: string }) => {
-  
+
   const emailForm = useForm<z.infer<typeof emailFormSchema>>({
     resolver: zodResolver(emailFormSchema),
     defaultValues: { email },
   });
 
   const { data: session, update } = useSession();
-
+  const [isSubmitting, setIsSubmitting] = useState(false); 
   
   async function handleEmailSubmit(values: z.infer<typeof emailFormSchema>) {
     const response = await fetch(`/api/updateEmail`, {
@@ -66,11 +63,10 @@ const DashboardForm = ({ email }: { email: string }) => {
 
     reloadSession();
 
-    toast.success('Email changed');
+    toast.success('Email changed'); 
   }
 
-
-  const bookingForm = useForm<z.infer<typeof bookingFormSchema>>({
+    const bookingForm = useForm<z.infer<typeof bookingFormSchema>>({
     resolver: zodResolver(bookingFormSchema),
     defaultValues: {
       activity: '',
@@ -79,15 +75,18 @@ const DashboardForm = ({ email }: { email: string }) => {
     },
   });
 
-  const activities = ['Yoga', 'Gym', 'Gymnastics', 'Aqua Aerobics'];
-
+  const activities = ['Yoga', 'Gym', 'Gymnastics', 'Aqua Aerobics', 'Zumba', 'Kickboxing', 'Swimming', 'Dance', 'Pilates', 'Boxing'];
 
   async function handleBookingSubmit(values: z.infer<typeof bookingFormSchema>) {
+    if (isSubmitting) return; 
+
+    setIsSubmitting(true); 
+
     const fullDateTime = new Date(`${values.date}T${values.time}:00`);
 
     if (isNaN(fullDateTime.getTime())) {
-      toast.error('Invalid date or time format.'); 
-      return;
+      toast.error('Invalid date or time format.');
+      setIsSubmitting(false);
     }
 
     const response = await fetch('/api/bookings', {
@@ -104,23 +103,22 @@ const DashboardForm = ({ email }: { email: string }) => {
     const data = await response.json();
     if (data.error) {
       toast.error('Failed to create booking. Try again.'); 
+      setIsSubmitting(false); 
       return;
     }
-
 
     const formattedDate = fullDateTime.toLocaleDateString();
     const formattedTime = fullDateTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     toast.success(`Your booking for ${values.activity} on ${formattedDate} at ${formattedTime} has been successfully confirmed!`); // Показать успех через toast
     bookingForm.reset();
+
+    setIsSubmitting(false); 
   }
 
   return (
     <div className="space-y-12">
-
       <Toaster position="bottom-right" expand={true} richColors={true} />
-
-
       <Form {...emailForm}>
         <form onSubmit={emailForm.handleSubmit(handleEmailSubmit)} className="space-y-8">
           <h1 className="text-2xl font-semibold">Modify your email</h1>
@@ -201,7 +199,9 @@ const DashboardForm = ({ email }: { email: string }) => {
               </FormItem>
             )}
           />
-          <Button type="submit">Book Now</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Booking...' : 'Book Now'}
+          </Button>
         </form>
       </Form>
     </div>
