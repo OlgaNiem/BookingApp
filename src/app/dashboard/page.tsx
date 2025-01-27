@@ -15,10 +15,9 @@ const  page = async () => {
     }
   return (
     
-    <main className='max-w-7xl mx-auto my-12 space-y-5'>
-        <h1 className='text-2xl font-semibold'>Welcome back, {user?.email}</h1>
-        <DashboardForm email= {session?.user?.email as string}></DashboardForm>
-    </main>
+<main className='max-w-7xl mx-auto my-12 space-y-6'>
+    <DashboardForm  />
+</main>
   );
 };
 
