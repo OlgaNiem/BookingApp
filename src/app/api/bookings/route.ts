@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid date format.' }, { status: 400 });
     }
 
-    let userId = session.user.id;
+    const userId = session.user.id;
 
     if (!ObjectId.isValid(userId)) {
       console.error("Invalid userId format");

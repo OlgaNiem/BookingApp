@@ -113,7 +113,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ session }) => {
             />
 
             <Link className='block text-sm text-center text-blue-500 hover:underline' href={'/register'}>
-              Don't have an account?
+              Do not have an account?
             </Link>
             <Button type="submit" className="w-full">Submit</Button>
           </form>
