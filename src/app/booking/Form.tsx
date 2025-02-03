@@ -30,7 +30,7 @@ const bookingFormSchema = z.object({
   time: z.string().min(1, { message: 'Please select a time.' }),
 });
 
-const DashboardForm = () => {
+const BookingForm = () => {
   const bookingForm = useForm<z.infer<typeof bookingFormSchema>>({
     resolver: zodResolver(bookingFormSchema),
     defaultValues: {
@@ -161,4 +161,4 @@ const DashboardForm = () => {
   );
 };
 
-export default DashboardForm;
+export default BookingForm;

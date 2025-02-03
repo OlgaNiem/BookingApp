@@ -2,7 +2,7 @@ import { getServerSession } from 'next-auth'
 import React from 'react'
 import { AuthOptions } from '../../../lib/authOptions'
 import { redirect } from 'next/navigation';
-import DashboardForm from './Form';
+import BookingForm from './Form';
 
 const  page = async () => {
     const session = await getServerSession(AuthOptions)
@@ -16,7 +16,7 @@ const  page = async () => {
   return (
     
 <main className='max-w-7xl mx-auto my-12 space-y-6'>
-    <DashboardForm  />
+    <BookingForm  />
 </main>
   );
 };

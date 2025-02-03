@@ -64,7 +64,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ session }) => {
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto shadow-lg p-6">
+    <Card className="w-full my-10 max-w-md mx-auto shadow-lg p-6">
       <CardHeader>
         <CardTitle className="text-center text-2xl font-bold">Login</CardTitle>
         <CardDescription className="text-center text-gray-600 mt-2">
@@ -112,7 +112,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ session }) => {
               )}
             />
 
-            <Link className="text-sm text-blue-500 hover:underline" href={'/register'}>
+            <Link className='block text-sm text-center text-blue-500 hover:underline' href={'/register'}>
               Don't have an account?
             </Link>
             <Button type="submit" className="w-full">Submit</Button>

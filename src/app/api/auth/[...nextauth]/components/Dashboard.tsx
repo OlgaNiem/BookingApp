@@ -32,7 +32,7 @@ const Dashboard: React.FC<DashboardProps> = ({ session }) => {
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
           <Button
-              onClick={() => router.push('/dashboard')} 
+              onClick={() => router.push('/booking')} 
               className="w-full"
             >
               Book activity
@@ -45,10 +45,7 @@ const Dashboard: React.FC<DashboardProps> = ({ session }) => {
       ) : (
         <Card className="w-full max-w-md shadow-lg">
           <CardHeader className="text-center">
-            <CardTitle className="text-3xl text-red-500 font-bold">You are not logged in</CardTitle>
-            <CardDescription className="text-gray-600 mt-2">
-              Please sign in to access your dashboard.
-            </CardDescription>
+            <CardTitle className="text-3xl text-gray-800 font-bold">You are not logged in</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col space-y-4">

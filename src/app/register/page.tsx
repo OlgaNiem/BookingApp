@@ -9,7 +9,7 @@ const page = async () => {
     const session = await getServerSession(AuthOptions)
 
     if (session) {
-        redirect('/dashboard');
+        redirect('/');
     }
     return (
         <section className="container h-screen flex items-center justify-center">
