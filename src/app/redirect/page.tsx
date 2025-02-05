@@ -16,5 +16,5 @@ export default function RedirectPage() {
     }
   }, [session, status, router]);
 
-  return <p>Redirecting...</p>;
+  return <p>Redirecting... Please, wait</p>;
 }
