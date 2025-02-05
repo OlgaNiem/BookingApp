@@ -53,7 +53,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ session }) => {
     const response = await signIn('credentials', {
       email: values.email,
       password: values.password,
-      redirect: false,
+      redirect: true,
     });
     if (!response?.error) {
       toast.success('You are now signed in');
