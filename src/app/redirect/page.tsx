@@ -1,19 +1,20 @@
-"use client"
-import { useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/router';
-
+"use client";
+import { useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 export default function RedirectPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    if (session?.user.role === 'admin') {
-      router.push('/user');
+    if (status === "loading") return; 
+
+    if (session?.user?.role === "admin") {
+      router.push("/");
     } else {
-      router.push('/dashboard');
+      router.push("/dashboard");
     }
-  }, [session, router]);
+  }, [session, status, router]);
 
   return <p>Redirecting...</p>;
 }

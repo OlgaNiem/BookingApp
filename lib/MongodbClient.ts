@@ -1,3 +1,4 @@
+"use server";
 import { MongoClient } from "mongodb";
 
 if (!process.env.MONGODB_URI) {
@@ -5,7 +6,9 @@ if (!process.env.MONGODB_URI) {
 }
 
 const uri = process.env.MONGODB_URI;
-const options = {};
+const options = {
+  autoEncryption: undefined,
+};
 
 let client;
 let clientPromise: Promise<MongoClient>;

@@ -1,4 +1,3 @@
-// pages/api/users.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import clientPromise from '../../../../lib/MongodbClient';
 import { getServerSession } from 'next-auth';
