@@ -43,7 +43,7 @@ export const AuthOptions: NextAuthOptions = {
                 }
                 return {
                     id: user.id,
-                    role: user.role || "user",
+                    role: user.role,
                     email: user.email,
                 };
             },
@@ -105,7 +105,7 @@ export const AuthOptions: NextAuthOptions = {
         jwt: async ({ user, token }) => {
             if (user) {
                 token.id = user.id;
-                token.role = user.role || "user";
+                token.role = user.role;
             }
             return token;
         },
