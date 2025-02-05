@@ -5,6 +5,7 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcrypt";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { User as PrismaUser } from "@prisma/client";
 
 export const AuthOptions: NextAuthOptions = {
     session: {
@@ -43,7 +44,7 @@ export const AuthOptions: NextAuthOptions = {
                 }
                 return {
                     id: user.id,
-                    role: user.role,
+                    role: user.role || "user",
                     email: user.email,
                 };
             },
@@ -105,7 +106,7 @@ export const AuthOptions: NextAuthOptions = {
         jwt: async ({ user, token }) => {
             if (user) {
                 token.id = user.id;
-                token.role = user.role;
+                token.role = (user as PrismaUser).role || "user";
             }
             return token;
         },
