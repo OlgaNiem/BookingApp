@@ -6,14 +6,8 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcrypt";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { User as PrismaUser } from "@prisma/client";
-import { Session } from "next-auth";
-import { JWT } from "next-auth/jwt";
- interface Session2 extends Session{
-    user: {
-        id: string;
-        role: string;
-    }
- }
+
+
 export const AuthOptions: NextAuthOptions = {
     session: {
         strategy: "jwt",
@@ -62,16 +56,16 @@ export const AuthOptions: NextAuthOptions = {
     callbacks: {
         async signIn({ user, account }) {
             const email = user.email;
-    
+
             if (!email) {
                 console.error("OAuth user email is missing.");
                 return false;
             }
-    
+
             const existingUser = await db.user.findUnique({
                 where: { email },
             });
-    
+
             if (existingUser) {
                 if (account) {
                     const linkedAccount = await db.account.findFirst({
@@ -81,7 +75,7 @@ export const AuthOptions: NextAuthOptions = {
                             providerAccountId: account.providerAccountId!,
                         },
                     });
-    
+
                     if (!linkedAccount) {
                         await db.account.create({
                             data: {
@@ -100,13 +94,12 @@ export const AuthOptions: NextAuthOptions = {
                     data: {
                         name: user.name || "",
                         email,
-                       
                         password: "",
                         emailVerified: null,
                     },
                 });
             }
-    
+
             return true;
         },
 
@@ -118,11 +111,11 @@ export const AuthOptions: NextAuthOptions = {
             return token;
         },
 
-        session: async ({ session, token } : {session: Session2, token: JWT}) => {
+        session: async ({ session, token }) => {
             if (token) {
                 session.user = {
                     ...session.user,
-                    id: token.id || '',
+                    id: token.id as string,
                     role: token.role as string,
                 };
             }
