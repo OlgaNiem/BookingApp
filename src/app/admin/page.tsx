@@ -1,8 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react';
-import { User } from '../../../types';
 import { WithId, Document } from 'mongodb';
 import clientPromise from '../../../lib/MongodbClient';
+import { User } from '../../../types';
 
 const AdminPage = () => {
   const [users, setUsers] = useState<User[]>([]); 
