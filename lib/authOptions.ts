@@ -6,7 +6,14 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcrypt";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { User as PrismaUser } from "@prisma/client";
-
+import { Session } from "next-auth";
+import { JWT } from "next-auth/jwt";
+ interface Session2 extends Session{
+    user: {
+        id: string;
+        role: string;
+    }
+ }
 export const AuthOptions: NextAuthOptions = {
     session: {
         strategy: "jwt",
@@ -111,7 +118,7 @@ export const AuthOptions: NextAuthOptions = {
             return token;
         },
 
-        session: async ({ session, token }) => {
+        session: async ({ session, token } : {session: Session2, token: JWT}) => {
             if (token) {
                 session.user = {
                     ...session.user,
