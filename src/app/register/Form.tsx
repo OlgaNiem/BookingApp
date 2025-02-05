@@ -77,7 +77,6 @@ const RegisterForm = () => {
       toast.error('Failed to sign in. Try logging in manually.');
       router.push('/login');
     } else {
-      // If sign-in is successful, directly replace the page with the home page
       router.replace('/');
     }
   }
