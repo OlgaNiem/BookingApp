@@ -2,10 +2,15 @@
 import { useEffect, useState } from 'react';
 import { WithId, Document } from 'mongodb';
 import clientPromise from '../../../lib/MongodbClient';
-import { User } from '../../../types';
 
 const AdminPage = () => {
-  const [users, setUsers] = useState<User[]>([]); 
+  interface User {
+    _id: string;
+    email: string;
+    role: string;
+  }
+
+  const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -14,7 +19,6 @@ const AdminPage = () => {
         const db = client.db();
 
         const users: WithId<Document>[] = await db.collection('users').find().toArray();
-
         const typedUsers: User[] = users.map((user) => ({
           _id: user._id.toString(),
           email: user.email,
