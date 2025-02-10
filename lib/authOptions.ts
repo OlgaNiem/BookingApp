@@ -21,26 +21,39 @@ export const AuthOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     }),
     CredentialsProvider({
-      name: "Credentials",
+      name: "Crentials",
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials) return null;
+        console.log("begining authorize");
+        if (!credentials) {
+          console.error("no credentials");
+          return null;
+      }
         const email = credentials.email;
         if (!email) return null;
+        console.log("Email:", credentials.email);
 
         try {
           const user = await db.user.findUnique({
             where: { email },
             select: { id: true, email: true, password: true, role: true },
           });
-
-          if (!user) return null;
+          console.log("user:", user);
+          
+          if (!user) {
+            console.error("user not found");
+            return null;
+        }
 
           const passwordCorrect = await compare(credentials.password, user.password as string);
-          if (!passwordCorrect) return null;
+          if (!passwordCorrect) {
+            console.error("wrong password");
+            return null;
+        }
+        console.log("success:", user.email);
 
           return { id: user.id, role: user.role || "user", email: user.email };
         } catch (error) {
