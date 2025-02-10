@@ -27,33 +27,21 @@ export const AuthOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        console.log("begining authorize");
-        if (!credentials) {
-          console.error("no credentials");
-          return null;
-      }
+        if (!credentials) return null;
+        
         const email = credentials.email;
         if (!email) return null;
-        console.log("Email:", credentials.email);
 
         try {
           const user = await db.user.findUnique({
             where: { email },
             select: { id: true, email: true, password: true, role: true },
           });
-          console.log("user:", user);
           
-          if (!user) {
-            console.error("user not found");
-            return null;
-        }
-
+          if (!user) return null;
+        
           const passwordCorrect = await compare(credentials.password, user.password as string);
-          if (!passwordCorrect) {
-            console.error("wrong password");
-            return null;
-        }
-        console.log("success:", user.email);
+          if (!passwordCorrect) return null;
 
           return { id: user.id, role: user.role || "user", email: user.email };
         } catch (error) {
