@@ -21,26 +21,23 @@ export const AuthOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     }),
     CredentialsProvider({
-      name: "Crentials",
+      name: "Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials) return null;
-        
-        const email = credentials.email;
-        if (!email) return null;
+        if (!credentials || !credentials.email) return null;
 
         try {
           const user = await db.user.findUnique({
-            where: { email },
+            where: { email: credentials.email },
             select: { id: true, email: true, password: true, role: true },
           });
-          
+
           if (!user) return null;
-        
-          const passwordCorrect = await compare(credentials.password, user.password as string);
+
+          const passwordCorrect = await compare(credentials.password, user.password || "");
           if (!passwordCorrect) return null;
 
           return { id: user.id, role: user.role || "user", email: user.email };
@@ -62,29 +59,21 @@ export const AuthOptions: NextAuthOptions = {
       }
 
       try {
-        const existingUserPromise = db.user.findUnique({
+        const existingUser = await db.user.findUnique({
           where: { email },
           select: { id: true, email: true },
         });
 
-        let linkedAccountPromise = null;
-        if (account) {
-          linkedAccountPromise = db.account.findFirst({
+        if (existingUser && account) {
+          const linkedAccount = await db.account.findFirst({
             where: {
-              userId: user.id,
+              userId: existingUser.id,
               provider: account.provider!,
               providerAccountId: account.providerAccountId!,
             },
           });
-        }
 
-        const [existingUser, linkedAccount] = await Promise.all([
-          existingUserPromise,
-          linkedAccountPromise,
-        ]);
-
-        if (existingUser) {
-          if (account && !linkedAccount) {
+          if (!linkedAccount) {
             await db.account.create({
               data: {
                 userId: existingUser.id,
@@ -96,7 +85,7 @@ export const AuthOptions: NextAuthOptions = {
               },
             });
           }
-        } else {
+        } else if (!existingUser) {
           await db.user.create({
             data: {
               name: user.name || "",
@@ -106,6 +95,7 @@ export const AuthOptions: NextAuthOptions = {
             },
           });
         }
+
         return true;
       } catch (error) {
         console.error("Error during sign-in", error);
