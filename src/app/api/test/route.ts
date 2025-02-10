@@ -1,6 +1,6 @@
 import { db } from "@/lib/prisma";
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     const users = await db.user.findMany({
       select: { email: true, name: true },
